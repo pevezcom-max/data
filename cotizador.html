@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cotizador Arte y Envase</title>
+  <style>
+    :root {
+      --bg: #f6f7f4;
+      --ink: #17201c;
+      --muted: #66736d;
+      --line: #d8ded7;
+      --panel: #ffffff;
+      --soft: #eef3ef;
+      --brand: #146c5f;
+      --brand-dark: #0d4d44;
+      --accent: #cc7a29;
+      --danger: #b42318;
+      --field: #fbfcfb;
+      --shadow: 0 10px 30px rgba(23, 32, 28, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app-header {
+      background: linear-gradient(90deg, #113f39, #146c5f);
+      color: #fff;
+      border-bottom: 5px solid var(--accent);
+    }
+
+    .header-inner {
+      width: min(1160px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 22px 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 46px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .brand-mark svg {
+      width: 29px;
+      height: 29px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.38rem;
+      line-height: 1.15;
+      letter-spacing: 0;
+      font-weight: 760;
+    }
+
+    .subhead {
+      margin-top: 4px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.92rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      height: 40px;
+      padding: 0 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    main {
+      width: min(1160px, calc(100% - 32px));
+      margin: 24px auto 36px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--brand);
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+      min-height: 94px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 720;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }
+
+    .metric-value {
+      margin-top: 8px;
+      font-size: 1.68rem;
+      font-weight: 780;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    .metric-unit {
+      margin-left: 4px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 1.05fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .band {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .band-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 48px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--soft);
+      font-weight: 760;
+    }
+
+    .band-title small {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .fields {
+      padding: 14px 16px 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: minmax(130px, 1fr) minmax(112px, 150px) minmax(70px, 0.55fr);
+      gap: 10px;
+      align-items: center;
+      min-height: 42px;
+    }
+
+    label {
+      color: #27332e;
+      font-weight: 650;
+      min-width: 0;
+    }
+
+    .unit {
+      color: var(--muted);
+      font-size: 0.88rem;
+      min-width: 0;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      height: 38px;
+      border: 1px solid #cbd4cd;
+      border-radius: 6px;
+      background: var(--field);
+      color: var(--ink);
+      padding: 0 10px;
+      text-align: right;
+    }
+
+    input[type="number"]:focus {
+      outline: 2px solid rgba(20, 108, 95, 0.2);
+      border-color: var(--brand);
+      background: #fff;
+    }
+
+    .stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .process-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 16px;
+    }
+
+    .process-grid .field-row {
+      grid-template-columns: minmax(110px, 1fr) minmax(86px, 118px) minmax(58px, 0.5fr);
+    }
+
+    .converter-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .converter {
+      border: 1px solid var(--line);
+      background: #fbfcfb;
+    }
+
+    .converter h3 {
+      margin: 0;
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      color: #20342f;
+      font-size: 0.96rem;
+      letter-spacing: 0;
+      background: #f4f6f3;
+    }
+
+    .converter .fields {
+      padding: 12px;
+    }
+
+    .converter .result-row {
+      grid-template-columns: minmax(92px, 1fr) minmax(88px, 112px) minmax(44px, 0.35fr);
+      gap: 6px;
+    }
+
+    .result-row {
+      display: grid;
+      grid-template-columns: minmax(130px, 1fr) minmax(112px, 150px) minmax(70px, 0.55fr);
+      gap: 10px;
+      align-items: center;
+      min-height: 40px;
+    }
+
+    .readonly {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      border: 1px solid #d8ded7;
+      border-radius: 6px;
+      background: #eef3ef;
+      padding: 0 10px;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .settings {
+      border-top: 1px solid var(--line);
+      margin-top: 4px;
+      padding-top: 12px;
+    }
+
+    details summary {
+      cursor: pointer;
+      color: var(--brand-dark);
+      font-weight: 740;
+      margin-bottom: 10px;
+    }
+
+    .notice {
+      border-left: 4px solid var(--accent);
+      background: #fff8ef;
+      color: #573414;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+    }
+
+    .copyright {
+      width: min(1160px, calc(100% - 32px));
+      margin: -18px auto 24px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-align: left;
+    }
+
+    @media (max-width: 920px) {
+      .summary,
+      .workspace,
+      .converter-grid,
+      .process-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .header-inner,
+      main {
+        width: min(100% - 20px, 1160px);
+      }
+
+      .field-row,
+      .process-grid .field-row,
+      .result-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+      }
+
+      input[type="number"],
+      .readonly {
+        text-align: left;
+        justify-content: flex-start;
+      }
+
+      .metric-value {
+        font-size: 1.42rem;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .app-header {
+        color: #000;
+        background: #fff;
+        border-bottom: 2px solid #000;
+      }
+
+      .subhead,
+      .actions,
+      details {
+        display: none;
+      }
+
+      .band,
+      .metric {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+
+      main {
+        margin-top: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M5 7.5 12 3l7 4.5v9L12 21l-7-4.5v-9Z" stroke="currentColor" stroke-width="1.8"></path>
+            <path d="m5.5 8 6.5 4 6.5-4M12 12v8.2" stroke="currentColor" stroke-width="1.8"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>Cotizador Arte y Envase</h1>
+          <div class="subhead">Cálculo de peso, costos y conversores de sustrato</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" id="resetBtn">Restaurar</button>
+        <button class="btn" type="button" id="printBtn">Imprimir</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="summary" aria-label="Resultados principales">
+      <div class="metric">
+        <div class="metric-label">Peso por millar</div>
+        <div class="metric-value"><span id="pesoMillar">0.00</span><span class="metric-unit">kg/millar</span></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Costo por kilo</div>
+        <div class="metric-value"><span id="costoKilo">$ 0.00</span><span class="metric-unit">/kg</span></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Costo por millar</div>
+        <div class="metric-value"><span id="costoMillar">$ 0.00</span><span class="metric-unit">/millar</span></div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="stack">
+        <section class="band">
+          <div class="band-title">
+            <span>Medidas del sustrato</span>
+            <small>pulgadas y milésimas</small>
+          </div>
+          <div class="fields">
+            <div class="field-row">
+              <label for="ancho">Ancho</label>
+              <input id="ancho" data-field="ancho" type="number" step="0.01" value="6">
+              <span class="unit">pulg.</span>
+            </div>
+            <div class="field-row">
+              <label for="largo">Largo</label>
+              <input id="largo" data-field="largo" type="number" step="0.01" value="12">
+              <span class="unit">pulg.</span>
+            </div>
+            <div class="field-row">
+              <label for="solapa">Solapa</label>
+              <input id="solapa" data-field="solapa" type="number" step="0.01" value="0">
+              <span class="unit">pulg.</span>
+            </div>
+            <div class="field-row">
+              <label for="fuelle">Fuelle</label>
+              <input id="fuelle" data-field="fuelle" type="number" step="0.01" value="0">
+              <span class="unit">pulg.</span>
+            </div>
+            <div class="field-row">
+              <label for="espesor">Espesor</label>
+              <input id="espesor" data-field="espesor" type="number" step="0.001" value="1.8">
+              <span class="unit">miles.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="band">
+          <div class="band-title">
+            <span>Kilos y millares</span>
+            <small>conversiones</small>
+          </div>
+          <div class="fields">
+            <div class="result-row">
+              <label for="kilosInput">Kilos a millares</label>
+              <input id="kilosInput" data-field="kilosInput" type="number" step="0.01" value="50">
+              <span class="unit">kg</span>
+            </div>
+            <div class="result-row">
+              <span class="unit">Resultado</span>
+              <output class="readonly" id="kilosToMillares">0.00</output>
+              <span class="unit">millares</span>
+            </div>
+            <div class="result-row">
+              <label for="millaresInput">Millares a kilos</label>
+              <input id="millaresInput" data-field="millaresInput" type="number" step="0.01" value="60.4">
+              <span class="unit">millares</span>
+            </div>
+            <div class="result-row">
+              <span class="unit">Resultado</span>
+              <output class="readonly" id="millaresToKilos">0.00</output>
+              <span class="unit">kg</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="stack">
+        <section class="band">
+          <div class="band-title">
+            <span>Procesos de producción</span>
+            <small>costos por kilo</small>
+          </div>
+          <div class="fields process-grid">
+            <div class="field-row">
+              <label for="materiaPrima">Materia prima</label>
+              <input id="materiaPrima" data-field="materiaPrima" type="number" step="0.01" value="1.9">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="extrusion">Extrusión</label>
+              <input id="extrusion" data-field="extrusion" type="number" step="0.01" value="0.3">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="coextrusion">Coextrusión</label>
+              <input id="coextrusion" data-field="coextrusion" type="number" step="0.01" value="0">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="impresion">Impresión</label>
+              <input id="impresion" data-field="impresion" type="number" step="0.01" value="1">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="barnizado">Barnizado</label>
+              <input id="barnizado" data-field="barnizado" type="number" step="0.01" value="0">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="laminado">Laminado</label>
+              <input id="laminado" data-field="laminado" type="number" step="0.01" value="0">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="sellado">Sellado</label>
+              <input id="sellado" data-field="sellado" type="number" step="0.01" value="0.3">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="refilado">Refilado</label>
+              <input id="refilado" data-field="refilado" type="number" step="0.01" value="0">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="troquelado">Troquelado</label>
+              <input id="troquelado" data-field="troquelado" type="number" step="0.01" value="0">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="costoSolapa">Solapa</label>
+              <input id="costoSolapa" data-field="costoSolapa" type="number" step="0.01" value="0">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="costoFuelle">Fuelle</label>
+              <input id="costoFuelle" data-field="costoFuelle" type="number" step="0.01" value="0">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="adhesivo">Adhesivo</label>
+              <input id="adhesivo" data-field="adhesivo" type="number" step="0.01" value="0">
+              <span class="unit">$/kg</span>
+            </div>
+            <div class="field-row">
+              <label for="aditivos">Aditivos</label>
+              <input id="aditivos" data-field="aditivos" type="number" step="0.01" value="0">
+              <span class="unit">$/kg</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="band">
+          <div class="band-title">
+            <span>Conversores</span>
+            <small>micras, miles, mm</small>
+          </div>
+          <div class="fields">
+            <div class="converter-grid">
+              <div class="converter">
+                <h3>Micras a milésimas</h3>
+                <div class="fields">
+                  <div class="result-row">
+                    <label for="micrasInput">Micras</label>
+                    <input id="micrasInput" data-field="micrasInput" type="number" step="0.01" value="68.58">
+                    <span class="unit">micras</span>
+                  </div>
+                  <div class="result-row">
+                    <span class="unit">Resultado</span>
+                    <output class="readonly" id="micrasToMiles">0.00</output>
+                    <span class="unit">miles.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="converter">
+                <h3>Milésimas a micras</h3>
+                <div class="fields">
+                  <div class="result-row">
+                    <label for="milesInput">Milésimas</label>
+                    <input id="milesInput" data-field="milesInput" type="number" step="0.001" value="2.7">
+                    <span class="unit">miles.</span>
+                  </div>
+                  <div class="result-row">
+                    <span class="unit">Resultado</span>
+                    <output class="readonly" id="milesToMicras">0.00</output>
+                    <span class="unit">micras</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="converter">
+                <h3>Pulgadas a mm</h3>
+                <div class="fields">
+                  <div class="result-row">
+                    <label for="pulgInput">Pulgadas</label>
+                    <input id="pulgInput" data-field="pulgInput" type="number" step="0.01" value="15.6">
+                    <span class="unit">pulg.</span>
+                  </div>
+                  <div class="result-row">
+                    <span class="unit">Resultado</span>
+                    <output class="readonly" id="pulgToMm">0.00</output>
+                    <span class="unit">mm</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="converter">
+                <h3>mm a pulgadas</h3>
+                <div class="fields">
+                  <div class="result-row">
+                    <label for="mmInput">Milímetros</label>
+                    <input id="mmInput" data-field="mmInput" type="number" step="0.01" value="500">
+                    <span class="unit">mm</span>
+                  </div>
+                  <div class="result-row">
+                    <span class="unit">Resultado</span>
+                    <output class="readonly" id="mmToPulg">0.00</output>
+                    <span class="unit">pulg.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="converter">
+                <h3>g/m2 a miles y micras</h3>
+                <div class="fields">
+                  <div class="result-row">
+                    <label for="gsmInput">Gramaje</label>
+                    <input id="gsmInput" data-field="gsmInput" type="number" step="0.001" value="63.402">
+                    <span class="unit">g/m2</span>
+                  </div>
+                  <div class="result-row">
+                    <span class="unit">Milésimas</span>
+                    <output class="readonly" id="gsmToMiles">0.00</output>
+                    <span class="unit">miles.</span>
+                  </div>
+                  <div class="result-row">
+                    <span class="unit">Micras</span>
+                    <output class="readonly" id="gsmToMicras">0.00</output>
+                    <span class="unit">micras</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="converter">
+                <h3>Miles o micras a g/m2</h3>
+                <div class="fields">
+                  <div class="result-row">
+                    <label for="milesGsmInput">Milésimas</label>
+                    <input id="milesGsmInput" data-field="milesGsmInput" type="number" step="0.001" value="2.7">
+                    <span class="unit">miles.</span>
+                  </div>
+                  <div class="result-row">
+                    <span class="unit">Gramaje</span>
+                    <output class="readonly" id="milesToGsm">0.00</output>
+                    <span class="unit">g/m2</span>
+                  </div>
+                  <div class="result-row">
+                    <label for="micrasGsmInput">Micras</label>
+                    <input id="micrasGsmInput" data-field="micrasGsmInput" type="number" step="0.01" value="68.58">
+                    <span class="unit">micras</span>
+                  </div>
+                  <div class="result-row">
+                    <span class="unit">Gramaje</span>
+                    <output class="readonly" id="micrasToGsm">0.00</output>
+                    <span class="unit">g/m2</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <details class="settings">
+              <summary>Parámetros técnicos</summary>
+              <div class="notice">Estos valores salen del archivo original y se pueden ajustar si cambia el material o el criterio de conversión.</div>
+              <div class="fields">
+                <div class="field-row">
+                  <label for="factorPeso">Factor de peso</label>
+                  <input id="factorPeso" data-field="factorPeso" type="number" step="0.0001" value="0.0303">
+                  <span class="unit">kg/millar</span>
+                </div>
+                <div class="field-row">
+                  <label for="factorGsmMiles">g/m2 por milésima</label>
+                  <input id="factorGsmMiles" data-field="factorGsmMiles" type="number" step="0.001" value="23.482">
+                  <span class="unit">g/m2</span>
+                </div>
+                <div class="field-row">
+                  <label for="factorGsmMicras">g/m2 por micra</label>
+                  <input id="factorGsmMicras" data-field="factorGsmMicras" type="number" step="0.0001" value="0.9242">
+                  <span class="unit">g/m2</span>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="copyright">Copyright Alberto Pevez Rosales</footer>
+
+  <script>
+    const defaults = {
+      ancho: 6,
+      largo: 12,
+      solapa: 0,
+      fuelle: 0,
+      espesor: 1.8,
+      kilosInput: 50,
+      millaresInput: 60.4,
+      materiaPrima: 1.9,
+      extrusion: 0.3,
+      coextrusion: 0,
+      impresion: 1,
+      barnizado: 0,
+      laminado: 0,
+      sellado: 0.3,
+      refilado: 0,
+      troquelado: 0,
+      costoSolapa: 0,
+      costoFuelle: 0,
+      adhesivo: 0,
+      aditivos: 0,
+      micrasInput: 68.58,
+      milesInput: 2.7,
+      pulgInput: 15.6,
+      mmInput: 500,
+      gsmInput: 63.402,
+      milesGsmInput: 2.7,
+      micrasGsmInput: 68.58,
+      factorPeso: 0.0303,
+      factorGsmMiles: 23.482,
+      factorGsmMicras: 0.9242
+    };
+
+    const processFields = [
+      "materiaPrima",
+      "extrusion",
+      "coextrusion",
+      "impresion",
+      "barnizado",
+      "laminado",
+      "sellado",
+      "refilado",
+      "troquelado",
+      "costoSolapa",
+      "costoFuelle",
+      "adhesivo",
+      "aditivos"
+    ];
+
+    const formatter = new Intl.NumberFormat("es-PE", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 4
+    });
+
+    const moneyFormatter = new Intl.NumberFormat("es-PE", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    function inputValue(name) {
+      const element = document.querySelector(`[data-field="${name}"]`);
+      if (!element) return 0;
+      const normalized = String(element.value).replace(",", ".");
+      const value = Number(normalized);
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    function setText(id, value, options = {}) {
+      const element = document.getElementById(id);
+      if (!element) return;
+      const formatted = options.money
+        ? `$ ${moneyFormatter.format(value)}`
+        : formatter.format(value);
+      element.textContent = formatted;
+    }
+
+    function calculate() {
+      const anchoTotal = inputValue("ancho") + inputValue("solapa") + inputValue("fuelle");
+      const pesoMillar = anchoTotal * inputValue("largo") * inputValue("espesor") * inputValue("factorPeso");
+      const costoKilo = processFields.reduce((total, field) => total + inputValue(field), 0);
+      const costoMillar = pesoMillar * costoKilo;
+      const kilosToMillares = pesoMillar === 0 ? 0 : inputValue("kilosInput") / pesoMillar;
+      const millaresToKilos = inputValue("millaresInput") * pesoMillar;
+      const micrasToMiles = inputValue("micrasInput") / 25.4;
+      const milesToMicras = inputValue("milesInput") * 25.4;
+      const pulgToMm = inputValue("pulgInput") * 25.4;
+      const mmToPulg = inputValue("mmInput") / 25.4;
+      const factorGsmMiles = inputValue("factorGsmMiles");
+      const factorGsmMicras = inputValue("factorGsmMicras");
+      const gsm = inputValue("gsmInput");
+
+      setText("pesoMillar", pesoMillar);
+      setText("costoKilo", costoKilo, { money: true });
+      setText("costoMillar", costoMillar, { money: true });
+      setText("kilosToMillares", kilosToMillares);
+      setText("millaresToKilos", millaresToKilos);
+      setText("micrasToMiles", micrasToMiles);
+      setText("milesToMicras", milesToMicras);
+      setText("pulgToMm", pulgToMm);
+      setText("mmToPulg", mmToPulg);
+      setText("gsmToMiles", factorGsmMiles === 0 ? 0 : gsm / factorGsmMiles);
+      setText("gsmToMicras", factorGsmMicras === 0 ? 0 : gsm / factorGsmMicras);
+      setText("milesToGsm", inputValue("milesGsmInput") * factorGsmMiles);
+      setText("micrasToGsm", inputValue("micrasGsmInput") * factorGsmMicras);
+    }
+
+    function restoreDefaults() {
+      Object.entries(defaults).forEach(([field, value]) => {
+        const element = document.querySelector(`[data-field="${field}"]`);
+        if (element) element.value = value;
+      });
+      calculate();
+    }
+
+    document.querySelectorAll("[data-field]").forEach((element) => {
+      element.addEventListener("input", calculate);
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", restoreDefaults);
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+    calculate();
+  </script>
+</body>
+</html>
